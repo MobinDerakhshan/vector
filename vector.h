@@ -139,4 +139,5 @@ private:
     total_size = new_size;
   }
 };
+//
 #endif // VECTOR_VECTOR_H
