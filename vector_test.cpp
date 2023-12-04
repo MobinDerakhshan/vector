@@ -109,4 +109,4 @@ TYPED_TEST(VectorTest, vector_of_vector) {
   EXPECT_EQ(vec2.size(), 0);
   EXPECT_EQ(vec3.size(), 1);
 }
-  
+
