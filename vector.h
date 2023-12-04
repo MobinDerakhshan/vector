@@ -35,6 +35,7 @@ public:
   };
   vector() {
     u_array = std::make_unique<T[]>(10);
+
     total_size = 10;
     current_size = 0;
   }
@@ -139,5 +140,5 @@ private:
     total_size = new_size;
   }
 };
-//
+
 #endif // VECTOR_VECTOR_H
