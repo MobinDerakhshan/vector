@@ -5,6 +5,7 @@
 #ifndef VECTOR_VECTOR_H
 #define VECTOR_VECTOR_H
 #include <iostream>
+#include <memory>
 
 template <typename T> class vector {
 public:
@@ -18,7 +19,7 @@ public:
       vecptr = vec;
       index = i;
     }
-    T &operator*() const { return vecptr->array[index]; }
+    T &operator*() const { return (*vecptr)[index]; }
     Iterator &operator++() {
       if (index != vecptr->current_size) {
         index++;
@@ -33,56 +34,54 @@ public:
     }
   };
   vector() {
-    array = new T[10];
+    u_array = std::make_unique<T[]>(10);
+
     total_size = 10;
     current_size = 0;
   }
   vector(int i) {
-    array = new T[i];
+    u_array = std::make_unique<T[]>(i);
     total_size = i;
     current_size = 0;
   }
   vector(int i, T t) {
-    array = new T[i];
+    u_array = std::make_unique<T[]>(i);
     total_size = i;
     current_size = i;
     for (int i = 0; i < current_size; i++) {
-      array[i] = t;
+      u_array[i] = t;
     }
   }
-  ~vector() { delete[] array; }
   vector(const vector &other) {
-    array = new T[other.total_size];
+    u_array = std::make_unique<T[]>(other.total_size);
     current_size = other.current_size;
     total_size = other.total_size;
     for (int i = 0; i < current_size; i++) {
-      array[i] = other[i];
+      u_array[i] = other[i];
     }
   }
   vector(vector &&other) noexcept {
-    array = other.array;
+    u_array = std::move(other.u_array);
     current_size = other.current_size;
     total_size = other.total_size;
-    other.array = NULL;
     other.current_size = 0;
     other.total_size = 0;
   }
   vector &operator=(const vector &other) {
-    delete[] array;
-    array = new T[other.total_size];
+    std::unique_ptr<T[]> temp = std::make_unique<T[]>(other.total_size);
+    for (int i = 0; i < other.current_size; i++) {
+      temp[i] = other[i];
+    }
+    u_array = std::move(temp);
     current_size = other.current_size;
     total_size = other.total_size;
-    for (int i = 0; i < current_size; i++) {
-      array[i] = other[i];
-    }
+
     return *this;
   }
   vector &operator=(vector &&other) noexcept {
-    delete[] array;
-    array = other.array;
+    u_array = std::move(other.u_array);
     current_size = other.current_size;
     total_size = other.total_size;
-    other.array = NULL;
     other.current_size = 0;
     other.total_size = 0;
     return *this;
@@ -93,55 +92,53 @@ public:
       return false;
     }
     for (int i = 0; i < current_size; i++) {
-      if (this->array[i] != other.array[i]) {
+      if ((*this)[i] != other[i]) {
         return false;
       }
     }
     return true;
   }
-  T &operator[](int i) const { return this->array[i]; }
+  T &operator[](int i) const { return this->u_array[i]; }
 
   void push_back(T t) {
     if (current_size == total_size) {
       resize(total_size * 2);
     }
-    array[current_size] = t;
+    u_array[current_size] = t;
     current_size++;
   }
   T pop_back() {
     current_size--;
-    return array[current_size];
+    return u_array[current_size];
   }
   int size() { return current_size; }
   void print() {
     for (int i = 0; i < current_size; i++) {
-      std::cout << array[i] << " ";
+      std::cout << u_array[i] << " ";
     }
   }
 
   Iterator begin() { return Iterator(0, this); }
   Iterator end() { return Iterator(current_size, this); }
 
-  friend class Iterator;
-
 private:
-  T *array;
+  std::unique_ptr<T[]> u_array;
   int current_size;
   int total_size;
 
   void resize(int new_size) {
     if (new_size <= 0)
       return;
-    T *temp = new T[new_size + 1];
+    std::unique_ptr<T[]> temp = std::make_unique<T[]>(new_size);
     int min_current_size_and_new_size =
         new_size < current_size ? new_size : current_size;
     for (int i = 0; i < min_current_size_and_new_size; i++) {
-      temp[i] = array[i];
+      temp[i] = u_array[i];
     }
-    delete[] array;
-    array = temp;
+    u_array = std::move(temp);
     current_size = min_current_size_and_new_size;
     total_size = new_size;
   }
 };
+
 #endif // VECTOR_VECTOR_H

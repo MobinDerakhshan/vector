@@ -60,7 +60,9 @@ TYPED_TEST(VectorTest, push_pop_eq) {
   vec4.push_back(i);
   vec4.push_back(j);
 
-  EXPECT_FALSE(vec1 == vec2);
+  if (i != k && i != j) {
+    EXPECT_FALSE(vec1 == vec2);
+  }
   EXPECT_FALSE(vec1 == vec3);
   EXPECT_TRUE(vec1 == vec4);
 
@@ -107,3 +109,4 @@ TYPED_TEST(VectorTest, vector_of_vector) {
   EXPECT_EQ(vec2.size(), 0);
   EXPECT_EQ(vec3.size(), 1);
 }
+  
